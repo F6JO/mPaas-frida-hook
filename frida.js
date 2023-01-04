@@ -61,262 +61,206 @@ function stringToByte(str) {
 }
 
 
+function uuid() {
+    var s = [];
+    var hexDigits = "0123456789abcdef";
+    for (var i = 0; i < 36; i++) {
+        s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
+    }
+    s[14] = "4"; // bits 12-15 of the time_hi_and_version field to 0010
+    s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1); // bits 6-7 of the clock_seq_hi_and_reserved to 01
+    s[8] = s[13] = s[18] = s[23] = "-";
+
+    var uuid = s.join("");
+    uuid = uuid.split("-").join("");
+    return uuid;
+}
+
 Java.perform(function () {
 
-        // var RpcInvoker = Java.use('com.alipay.mobile.common.rpc.RpcInvoker');
-        // RpcInvoker.getSerializer.implementation = function (method, args, operationTypeValue, id, invokeContext, protoDesc) {
-        //     console.log("getSerializer");
-        //     var SerializerObject = this.getSerializer(method, args, operationTypeValue, id, invokeContext, protoDesc);
-        //     var byte1 = SerializerObject.packet();
-        //     console.log(byte1)
-        //     return SerializerObject;
-        // }
 
 
-        // var SignJsonSerializer = Java.use('com.alipay.mobile.common.rpc.protocol.json.SignJsonSerializer');
-        // SignJsonSerializer.packet.implementation = function () {
-        //     console.log("packetpacketpacket");
-        //     var OldreqData = this.packet();
-        //     return OldreqData;
-        // send({type: 'REQ', data: utf8ByteToUnicodeStr(OldreqData)})
-        // var typexx;
-        // var string_to_recv;
-        // recv(function (received_json_object) {
-        //     typexx = received_json_object['type'];
-        //     string_to_recv = received_json_object['payload'];
-        //
-        // }).wait();
-        //
-        // if (typexx === 'NEW_REQ') {
-        //     // console.log("frida接收请求")
-        //     console.log("string_to_recv");
-        //     console.log(OldreqData);
-        //     console.log(string_to_recv);
-        //     return stringToByte(string_to_recv)
-        //     // return this.$init(config, method, id, op, reqData, contentType, context, invokeContext);
-        // }
-        // }
 
-
-        // 获取响应
-        // var Response = Java.use('com.alipay.mobile.common.transport.Response');
-        // Response.getResData.implementation = function () {
-        //     console.log("getResData");
-        //     var zhi = this.mResData.value;
-        //
-        //     send({type: 'RESP', data: zhi})
+        // var PBSerializer = Java.use('com.alipay.mobile.common.rpc.protocol.protobuf.PBSerializer');
+        // PBSerializer.packet.implementation = function () {
+        //     console.log();
+        //     console.log("------------------PBSerializer---------------------------------");
+        //     var uuidx = uuid();
+        //     var OldReqData = utf8ByteToUnicodeStr(this.packet())+ "!!!uuidx:" +uuidx + "!!!";
+        //     // console.log(OldReqData)
+        //     send({type: 'REQ', data: OldReqData});
         //     var typexx;
         //     var string_to_recv;
         //     recv(function (received_json_object) {
         //         typexx = received_json_object['type'];
         //         string_to_recv = received_json_object['payload'];
-        //
-        //
         //     }).wait();
         //
         //     if (typexx === 'NEW_REQ') {
-        //         console.log("frida接收")
-        //         console.log(string_to_recv);
-        //         var new_reqData = stringToByte(string_to_recv);
-        //         console.log(new_reqData);
-        //         console.log(reqData);
-        //         return this.$init(config, method, id, op, new_reqData, contentType, context, invokeContext);
-        //         // return this.$init(config, method, id, op, reqData, contentType, context, invokeContext);
+        //         console.log(uuidx + ": NewREQ: " + string_to_recv)
+        //         console.log("------------------PBSerializer end---------------------------------");
+        //         return stringToByte(string_to_recv + "!!!uuidx:" +uuidx + "!!!");
         //     }
         //
-        //     // console.log(zhi)
-        //     return zhi;
+        //     console.log("!!!!!!!!!!!!!!!!!!PBSerializer NOT NEW_REQ!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
+        //     // return stringToByte(OldReqData + "[uuidx:" +uuidx + "]");
+        // }
+
+        // var SimpleRpcJsonSerializerV2 = Java.use('com.alipay.mobile.common.rpc.protocol.json.SimpleRpcJsonSerializerV2');
+        // SimpleRpcJsonSerializerV2.packet.implementation = function () {
+        //     console.log();
+        //     console.log("------------------SimpleRpcJsonSerializerV2---------------------------------");
+        //     // return this.packet()
+        //     var OldReqData = this.packet();
+        //     console.log(utf8ByteToUnicodeStr(OldReqData));
+        //     console.log("------------------SimpleRpcJsonSerializerV2 end---------------------------------");
+        //     return OldReqData;
+        // }
+
+        // var SimpleRpcPBSerializer = Java.use('com.alipay.mobile.common.rpc.protocol.protobuf.SimpleRpcPBSerializer');
+        // SimpleRpcPBSerializer.packet.implementation = function () {
+        //     console.log();
+        //     console.log("------------------SimpleRpcPBSerializer---------------------------------");
+        //     var uuidx = uuid();
+        //     var OldReqData = utf8ByteToUnicodeStr(this.packet())+ "!!!uuidx:" +uuidx + "!!!";
+        //     // console.log(OldReqData)
+        //     send({type: 'REQ', data: OldReqData});
+        //     var typexx;
+        //     var string_to_recv;
+        //     recv(function (received_json_object) {
+        //         typexx = received_json_object['type'];
+        //         string_to_recv = received_json_object['payload'];
+        //     }).wait();
+        //
+        //     if (typexx === 'NEW_REQ') {
+        //         console.log(uuidx + ": NewREQ: " + string_to_recv)
+        //         console.log("------------------SimpleRpcPBSerializer end---------------------------------");
+        //         return stringToByte(string_to_recv + "!!!uuidx:" +uuidx + "!!!");
+        //     }
+        //
+        //     console.log("!!!!!!!!!!!!!!!!!!SimpleRpcPBSerializer NOT NEW_REQ!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
+        //     // return stringToByte(OldReqData + "[uuidx:" +uuidx + "]");
         // }
 
 
-        // 修改响应
-        var RpcInvoker = Java.use('com.alipay.mobile.common.rpc.RpcInvoker');
-        RpcInvoker.a.overload('java.lang.reflect.Method', '[Ljava.lang.Object;', 'java.lang.String', 'int', 'com.alipay.mobile.common.rpc.transport.InnerRpcInvokeContext', 'com.alipay.mobile.common.rpc.protocol.util.RPCProtoDesc').implementation = function (a1, b, c, d, e, f) {
-            // console.log("m17325a");
-            var Response = this.a(a1, b, c, d, e, f);
 
-            // sign()
-            // console.log("frida准备响应")
-            var RespBytes = Response.getResData();
-            // console.log(utf8ByteToUnicodeStr(RespBytes));
-            // console.log("frida发送响应")
-            send({type: 'RESP', data: utf8ByteToUnicodeStr(RespBytes)});
-            var string_to_recv;
+        // var LoginRpcRequestModel = Java.use('com.mobile.mbank.login.rpc.LoginRpcRequestModel');
+        // LoginRpcRequestModel.sendSmsCode = function (a,b,c,d){
+        //     console.log("LoginRpcRequestModelLoginRpcRequestModelLoginRpcRequestModel")
+        //     console.log(a)
+        //     console.log(b)
+        //     console.log(c)
+        //     console.log(d)
+        //     return this.sendSmsCode(a,b,c,d);
+        //     // console.log("RpcInvokerRpcInvokerRpcInvoker")
+        //
+        //
+        //     // this.a(a,b,c,d,e);
+        // }
+
+        // 绕过root检测 com.mobile.mbank.common.api.service.CheckAppEnvServiceImpl.lambda$showCloseDialog$8(Activity, String) void
+        Java.use('com.mobile.mbank.common.api.service.CheckAppEnvServiceImpl').lambda$showCloseDialog$8.implementation = function (a, b){
+            console.log(a)
+            console.log(b)
+            // // return this.lambda$showCloseDialog$8(a,b);
+
+        }
+
+        var JsonSerializerV2 = Java.use('com.alipay.mobile.common.rpc.protocol.json.JsonSerializerV2');
+
+        JsonSerializerV2.packet.implementation = function () {
+            console.log();
+            console.log("------------------JsonSerializerV2---------------------------------");
+            var uuidx = uuid();
+            var OldReqData = utf8ByteToUnicodeStr(this.packet())+ "!!!uuidx:" +uuidx + "!!!";
+            // console.log(OldReqData)
+            send({type: 'REQ', data: OldReqData});
             var typexx;
+            var string_to_recv;
+            recv(function (received_json_object) {
+                typexx = received_json_object['type'];
+                string_to_recv = received_json_object['payload'];
+            }).wait();
+
+            if (typexx === 'NEW_REQ') {
+                console.log(uuidx + ": NewREQ: " + string_to_recv)
+                console.log("------------------JsonSerializerV2 end---------------------------------");
+                return stringToByte(string_to_recv + "!!!uuidx:" +uuidx + "!!!");
+            }
+
+            console.log("!!!!!!!!!!!!!!!!!!JsonSerializerV2 NOT NEW_REQ!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
+            // return stringToByte(OldReqData + "[uuidx:" +uuidx + "]");
+        }
+
+        var SignJsonSerializer = Java.use('com.alipay.mobile.common.rpc.protocol.json.SignJsonSerializer');
+        SignJsonSerializer.packet.implementation = function () {
+            console.log();
+            console.log("------------------SignJsonSerializer---------------------------------");
+            var uuidx = uuid();
+            var OldReqData = utf8ByteToUnicodeStr(this.packet())+ "!!!uuidx:" +uuidx + "!!!";
+            send({type: 'REQ', data: OldReqData});
+            var typexx;
+            var string_to_recv;
+            recv(function (received_json_object) {
+                typexx = received_json_object['type'];
+                string_to_recv = received_json_object['payload'];
+            }).wait();
+
+            if (typexx === 'NEW_REQ') {
+                console.log(uuidx + ": NewREQ: " + string_to_recv)
+                console.log("------------------SignJsonSerializer end---------------------------------");
+                return stringToByte(string_to_recv + "!!!uuidx:" +uuidx + "!!!");
+            }
+
+            console.log("!!!!!!!!!!!!!!!!!!SignJsonSerializer NOT NEW_REQ!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
+            // return stringToByte(OldReqData + "[uuidx:" +uuidx + "]");
+        }
+
+        var HttpCaller = Java.use('com.alipay.mobile.common.rpc.transport.http.HttpCaller');
+        HttpCaller.b.overload('com.alipay.mobile.common.transport.http.HttpUrlRequest').implementation = function (a){
+            var uuidchuanzu = utf8ByteToUnicodeStr(a.getReqData()).match(/!!!uuidx:(.*?)!!!/g);
+            var uuidchuan = "";
+            if (uuidchuanzu != null){
+                uuidchuan = uuidchuanzu[0];
+            }
+            var uuidx = uuidchuan.replace("!!!uuidx:","").replace("!!!","");
+            a.setReqData(stringToByte(utf8ByteToUnicodeStr(a.getReqData()).replace(uuidchuan,"")));
+            var resp = this.b(a);
+            // console.log("xiangying: "+utf8ByteToUnicodeStr(resp.getResData()));
+            var respStr = utf8ByteToUnicodeStr(resp.getResData()) + "!!!uuidx:" + uuidx + "!!!";
+
+            send({type: 'RESP', data: respStr});
+            var typexx;
+            var string_to_recv;
             recv(function (received_json_object) {
                 typexx = received_json_object['type'];
                 string_to_recv = received_json_object['payload'];
             }).wait();
 
             if (typexx === 'NEW_RESP') {
-                // console.log("frida接收响应")
-                // console.log(string_to_recv);
-                var new_respData = stringToByte(string_to_recv);
-                // console.log(new_respData);
-                // console.log(RespBytes);
-                Response.setResData(new_respData);
-                // console.log(Response.getResData())
-                // console.log("frida放开响应，继续运行")
-                return Response;
+                console.log(uuidx+": NewREP: " + string_to_recv)
+                resp.setResData(stringToByte(string_to_recv))
+                return resp
             }
 
-            // return Response;
 
         }
 
-        // 修改请求
-        // var HttpCaller = Java.use('com.alipay.mobile.common.rpc.transport.http.HttpCaller');
-        // HttpCaller.$init.implementation = function (config, method, id, op, reqData, contentType, context, invokeContext) {
-        //     // console.log("frida发送请求")
-        //     send({type: 'REQ', data: utf8ByteToUnicodeStr(reqData)})
-        //     var typexx;
-        //     var string_to_recv;
-        //     recv(function (received_json_object) {
-        //         typexx = received_json_object['type'];
-        //         string_to_recv = received_json_object['payload'];
-        //
-        //
-        //     }).wait();
-        //
-        //     if (typexx === 'NEW_REQ') {
-        //         // console.log("frida接收请求")
-        //
-        //         console.log("string_to_recv");
-        //         var new_reqData = stringToByte(string_to_recv);
-        //         console.log(new_reqData);
-        //         console.log(reqData);
-        //         // console.log(new_reqData);
-        //         // console.log(reqData);
-        //         // console.log("frida放开请求，继续运行")
-        //         return this.$init(config, method, id, op, new_reqData, contentType, context, invokeContext);
-        //         // return this.$init(config, method, id, op, reqData, contentType, context, invokeContext);
-        //     }
-        //
-        // }
-
-        var JsonSerializerV2 = Java.use('com.alipay.mobile.common.rpc.protocol.json.JsonSerializerV2');
-        JsonSerializerV2.packet.implementation = function () {
-            var OldReqData = this.packet();
-            send({type: 'REQ', data: utf8ByteToUnicodeStr(OldReqData)})
-            var typexx;
-            var string_to_recv;
-            recv(function (received_json_object) {
-                typexx = received_json_object['type'];
-                string_to_recv = received_json_object['payload'];
-
-
-            }).wait();
-
-            if (typexx === 'NEW_REQ') {
-                // console.log("frida接收请求")
-
-                console.log("string_to_recv");
-                var new_reqData = stringToByte(string_to_recv);
-                console.log(OldReqData);
-                console.log(string_to_recv);
-                // console.log(new_reqData);
-                // console.log(reqData);
-                // console.log("frida放开请求，继续运行")
-                return new_reqData;
-                // return this.$init(config, method, id, op, reqData, contentType, context, invokeContext);
+        var RpcInvoker = Java.use('com.alipay.mobile.common.rpc.RpcInvoker');
+        RpcInvoker.a.overload('java.lang.reflect.Method','java.lang.String','[B','com.alipay.mobile.common.rpc.transport.InnerRpcInvokeContext','com.alipay.mobile.common.rpc.transport.http.HttpCaller').implementation = function (a,b,c,d,e){
+            // console.log("RpcInvokerRpcInvokerRpcInvoker")
+            var uuidchuanzu = utf8ByteToUnicodeStr(c).match(/!!!uuidx:(.*?)!!!/g);
+            if (uuidchuanzu != null){
+                var uuidchuan = uuidchuanzu[0];
+                var newc = stringToByte(utf8ByteToUnicodeStr(c).replace(uuidchuan,""))
+                // console.log(utf8ByteToUnicodeStr(newc))
+                this.a(a,b,newc,d,e);
+            }else {
+                this.a(a,b,c,d,e)
             }
+
+            // this.a(a,b,c,d,e);
         }
-
-
-
-        // var Serializer = Java.use('com.alipay.mobile.common.rpc.protocol.Serializer');
-        // Serializer.packet.implementation = function () {
-        //     console.log("SerializerSerializerSerializerSerializer");
-        //     return this.packet();
-        // }
-
-        // var PBSerializer = Java.use('com.alipay.mobile.common.rpc.protocol.protobuf.PBSerializer');
-        // PBSerializer.packet.implementation = function () {
-        //     var OldReqData = this.packet();
-        //     send({type: 'REQ', data: utf8ByteToUnicodeStr(OldReqData)})
-        //     var typexx;
-        //     var string_to_recv;
-        //     recv(function (received_json_object) {
-        //         typexx = received_json_object['type'];
-        //         string_to_recv = received_json_object['payload'];
-        //
-        //
-        //     }).wait();
-        //
-        //     if (typexx === 'NEW_REQ') {
-        //         // console.log("frida接收请求")
-        //
-        //         console.log("string_to_recv");
-        //         var new_reqData = stringToByte(string_to_recv);
-        //         console.log(OldReqData);
-        //         console.log(string_to_recv);
-        //         // console.log(new_reqData);
-        //         // console.log(reqData);
-        //         // console.log("frida放开请求，继续运行")
-        //         return new_reqData;
-        //         // return this.$init(config, method, id, op, reqData, contentType, context, invokeContext);
-        //     }
-        // }
-        //
-        // var SimpleRpcJsonSerializerV2 = Java.use('com.alipay.mobile.common.rpc.protocol.json.SimpleRpcJsonSerializerV2');
-        // SimpleRpcJsonSerializerV2.packet.implementation = function () {
-        //     var OldReqData = this.packet();
-        //     send({type: 'REQ', data: utf8ByteToUnicodeStr(OldReqData)})
-        //     var typexx;
-        //     var string_to_recv;
-        //     recv(function (received_json_object) {
-        //         typexx = received_json_object['type'];
-        //         string_to_recv = received_json_object['payload'];
-        //
-        //
-        //     }).wait();
-        //
-        //     if (typexx === 'NEW_REQ') {
-        //         // console.log("frida接收请求")
-        //
-        //         console.log("string_to_recv");
-        //         var new_reqData = stringToByte(string_to_recv);
-        //         console.log(OldReqData);
-        //         console.log(string_to_recv);
-        //         // console.log(new_reqData);
-        //         // console.log(reqData);
-        //         // console.log("frida放开请求，继续运行")
-        //         return new_reqData;
-        //         // return this.$init(config, method, id, op, reqData, contentType, context, invokeContext);
-        //     }
-        // }
-        //
-        //
-        //
-        //
-        //
-        // var SimpleRpcPBSerializer = Java.use('com.alipay.mobile.common.rpc.protocol.protobuf.SimpleRpcPBSerializer');
-        // SimpleRpcPBSerializer.packet.implementation = function () {
-        //     var OldReqData = this.packet();
-        //     send({type: 'REQ', data: utf8ByteToUnicodeStr(OldReqData)})
-        //     var typexx;
-        //     var string_to_recv;
-        //     recv(function (received_json_object) {
-        //         typexx = received_json_object['type'];
-        //         string_to_recv = received_json_object['payload'];
-        //
-        //
-        //     }).wait();
-        //
-        //     if (typexx === 'NEW_REQ') {
-        //         // console.log("frida接收请求")
-        //
-        //         console.log("string_to_recv");
-        //         var new_reqData = stringToByte(string_to_recv);
-        //         console.log(OldReqData);
-        //         console.log(string_to_recv);
-        //         // console.log(new_reqData);
-        //         // console.log(reqData);
-        //         // console.log("frida放开请求，继续运行")
-        //         return new_reqData;
-        //         // return this.$init(config, method, id, op, reqData, contentType, context, invokeContext);
-        //     }
-        // }
 
 
 

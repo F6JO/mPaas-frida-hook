@@ -1,5 +1,7 @@
 # frida.py
+import re
 import string
+import threading
 import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from threading import Thread
@@ -9,13 +11,16 @@ import sys  # 导入sys模块
 
 import requests
 import globalVar as gl
+import flaskServer
 
+
+suo = threading.Lock()
 ECHO_PORT = 28081
 BURP_PORT = 8080
 gl._init()
-gl.set("Request_data", None)
-gl.set("Respone_data", None)
-gl.set("OK_NO", True)
+
+def webRun():
+    flaskServer.app.run(host='127.0.0.1', port=ECHO_PORT)
 
 
 class RequestHandler(BaseHTTPRequestHandler):
@@ -23,21 +28,22 @@ class RequestHandler(BaseHTTPRequestHandler):
     global Respone_data
 
     def do_REQUEST(self):
+        print("laile")
         content_length = int(self.headers.get('content-length', 0))
-
-
         fasong = self.rfile.read(content_length)
-        gl.set("Request_data", fasong.decode())
-        while gl.get("Respone_data") == None:
-            print("burp等待响应")
+        uuid = self.path.replace("/","")
+        gl.set(uuid + "req", fasong.decode())
+        # print("11111111111" + gl.get(uuid + "req"))
+        ixx = 0
+        while gl.get(uuid + "rep") == None:
+            if ixx >= 10 :
+                gl.set(uuid + "rep", "Time Out...")
+            print(uuid)
+            ixx += 1
             time.sleep(1)
-        print("burp接收响应并返回")
-        print(gl.get("Respone_data"))
-        print("响应")
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(gl.get("Respone_data").encode())
-        gl.set("OK_NO", True)
+        self.wfile.write(gl.get(uuid + "rep").encode())
 
     do_RESPONSE = do_REQUEST
 
@@ -48,62 +54,44 @@ def echo_server_thread():
     server.serve_forever()
 
 
-t = Thread(target=echo_server_thread)
+t = Thread(target=webRun)
 t.daemon = True
 t.start()
 
 
 def on_message(message, data):  # js中执行send函数后要回调的函数
+    # print(message)
     global Request_data
     global Respone_data
     if message["type"] == "send":
         payload = message["payload"]
         _type, body = payload['type'], payload['data']
+        uuid = re.findall("!!!uuidx:(.*?)!!!", body)[0]
+        body = body.replace("!!!uuidx:" + uuid + "!!!", "")
         if _type == 'REQ':
-            print("python接收请求")
-            jishi = 0
-            while not gl.get("OK_NO"):
-                if jishi < 8:
-                    print("等待上一个请求结束")
-                    time.sleep(1)
-                    jishi += 1
-                else:
-                    print("请求超时，跳过")
-                    gl.set("Respone_data","None...")
-                    time.sleep(2)
-                    gl.set("OK_NO",True)
-                    break
-            gl.set("OK_NO", False)
-            gl.set("Request_data", None)
-            gl.set("Respone_data", None)
-
             def send_burp_req():
-                print("python发送请求到burp")
-                requests.request('REQUEST', 'http://127.0.0.1:{}/'.format(ECHO_PORT),
+                requests.request('REQUEST', 'http://127.0.0.1:{}/{}'.format(ECHO_PORT,uuid),
                                  proxies={'http': 'http://127.0.0.1:{}'.format(BURP_PORT)},
                                  data=body.encode('utf-8'))
 
             x = Thread(target=send_burp_req)
             x.start()
-            while gl.get("Request_data") == None:
-                print("python等待burp返回请求")
+            while gl.get(uuid + "req") == None:
+                # print(gl.get(uuid + "req"))
                 time.sleep(1)
-            print("python送回修改后的请求")
-            script.post({'type': 'NEW_REQ', 'payload': gl.get("Request_data")})
-
+            # print("pythonfanhui: " + gl.get(uuid + "req"))
+            script.post({'type': 'NEW_REQ', 'payload': gl.get(uuid + "req")})
 
         elif _type == 'RESP':
-            print("python接收响应")
-            gl.set("Respone_data", body)
-            print("python送回响应")
-            script.post({'type': 'NEW_RESP', 'payload': gl.get("Respone_data")})
+            gl.set(uuid + "rep",body)
+            script.post({'type': 'NEW_RESP', 'payload': gl.get(uuid + "rep")})
 
 
 '''
 spawn模式，Frida会自行启动并注入进目标App，Hook的时机非常早
 '''
 # device=frida.get_remote_device()
-# pid=device.spawn(['cn.dongguanbank.mbank.test'])  #包名
+# pid=device.spawn([''])  #包名
 # device.resume(pid)
 # time.sleep(1)
 # session = device.attach(pid)
