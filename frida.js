@@ -159,12 +159,12 @@ Java.perform(function () {
         // }
 
         // 绕过root检测 com.mobile.mbank.common.api.service.CheckAppEnvServiceImpl.lambda$showCloseDialog$8(Activity, String) void
-        Java.use('com.mobile.mbank.common.api.service.CheckAppEnvServiceImpl').lambda$showCloseDialog$8.implementation = function (a, b){
-            console.log(a)
-            console.log(b)
-            // // return this.lambda$showCloseDialog$8(a,b);
+        // Java.use('com.mobile.mbank.common.api.service.CheckAppEnvServiceImpl').lambda$showCloseDialog$8.implementation = function (a, b){
+        //     console.log(a)
+        //     console.log(b)
+        //     // // return this.lambda$showCloseDialog$8(a,b);
 
-        }
+        // }
 
         var JsonSerializerV2 = Java.use('com.alipay.mobile.common.rpc.protocol.json.JsonSerializerV2');
 
